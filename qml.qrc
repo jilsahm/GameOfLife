@@ -2,5 +2,11 @@
     <qresource prefix="/">
         <file>views/main.qml</file>
         <file>views/IconButton.qml</file>
+        <file>fonts/FontAwesome5.otf</file>
+        <file>src/gameboard.cpp</file>
+        <file>src/gameboard.h</file>
+        <file>src/main.cpp</file>
+        <file>views/fonts.qml</file>
+        <file>views/qmldir</file>
     </qresource>
 </RCC>

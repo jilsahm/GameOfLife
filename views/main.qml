@@ -23,13 +23,41 @@ Rectangle {
             Layout.preferredHeight: mainwrapper.height * 0.08
 
             IconButton{
+                symbol: "\uf2f9"
                 anchors.left: parent.left
+                anchors.verticalCenter: parent.verticalCenter
+                callback: function(){
+                    console.log("Restart")
+                }
+            }
+
+            IconButton{
+                id: btnSlower
+                symbol: "\uf04a"
+                anchors.right: btnStop.left
                 anchors.verticalCenter: parent.verticalCenter
             }
 
             IconButton{
+                id: btnStop
+                symbol: "\uf04c"
+                anchors.centerIn: parent
+            }
+
+            IconButton{
+                id: btnFaster
+                symbol: "\uf04e"
+                anchors.left: btnStop.right
+                anchors.verticalCenter: parent.verticalCenter
+            }
+
+            IconButton{
+                symbol: "\uf52b"
                 anchors.right: parent.right
                 anchors.verticalCenter: parent.verticalCenter
+                callback: function(){
+                    Qt.quit()
+                }
             }
         }
     }
