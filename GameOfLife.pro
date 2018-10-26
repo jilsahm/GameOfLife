@@ -14,7 +14,8 @@ DEFINES += QT_DEPRECATED_WARNINGS
 
 SOURCES += \
     src/main.cpp \
-    src/gameboard.cpp
+    src/gameboard.cpp \
+    src/cells.cpp
 
 RESOURCES += \
     qml.qrc
@@ -31,4 +32,5 @@ else: unix:!android: target.path = /opt/$${TARGET}/bin
 !isEmpty(target.path): INSTALLS += target
 
 HEADERS += \
-    src/gameboard.h
+    src/gameboard.h \
+    src/cells.h

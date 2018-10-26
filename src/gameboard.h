@@ -9,7 +9,9 @@
 #include <QQuickPaintedItem>
 
 using std::shared_ptr;
+using std::unique_ptr;
 using std::make_shared;
+using std::make_unique;
 
 class GameBoard : public QQuickPaintedItem
 {
@@ -18,8 +20,11 @@ class GameBoard : public QQuickPaintedItem
 public:
     GameBoard(QQuickItem * parent = nullptr);
     void paint(QPainter *) override;
+    void debug(shared_ptr<QImage>);
 
 private:
+    unique_ptr<QRgb> colorLifingCell;
+    unique_ptr<QRgb> colorDeadCell;
 };
 
 #endif // GAMEBOARD_H
