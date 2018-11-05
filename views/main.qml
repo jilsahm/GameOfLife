@@ -63,9 +63,12 @@ Rectangle {
     }
 
     Timer {
-        interval: 100
+        interval: 200
         running: true
         repeat: true
-        onTriggered: gameboard.update()
+        onTriggered: function(){
+            gameboard.nextGeneration();
+            gameboard.update();
+        }
     }
 }
