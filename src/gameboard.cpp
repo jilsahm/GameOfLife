@@ -2,7 +2,8 @@
 
 GameBoard::GameBoard(QQuickItem * parent)
     : QQuickPaintedItem(parent),
-      cells{1920, 700}
+      idealThreadCount{QThread::idealThreadCount()},
+      cells{nullptr}
 {
     this->colorLifingCell = make_unique<QRgb>(qRgb(100, 255, 100));
     this->colorDeadCell   = make_unique<QRgb>(qRgb(32, 32, 32));
@@ -32,25 +33,57 @@ void GameBoard::paint(QPainter * painter){
     size_t      numberOfColumns {static_cast<size_t>(drawingArea->width())};
     QRgb       *currentLine     {nullptr};
     auto starttime = duration_cast<milliseconds>(system_clock::now().time_since_epoch()).count();
+    /*
+    if (this->cells != nullptr){
+        for (size_t currentRow = 0; currentRow < numberOfRows; currentRow++ ){
+            currentLine = (QRgb *)drawingArea->scanLine(currentRow);
+            for (size_t currentColumn = 0; currentColumn < numberOfColumns; currentColumn++, currentLine++){
+                if (this->cells->getCell(currentColumn, currentRow) == 1){
+                    *currentLine = *this->colorLifingCell;
+                } else {
+                    *currentLine = *this->colorDeadCell;
+                }
+            }
+        }
+    }*/
 
-    for (size_t currentRow = 0; currentRow < numberOfRows; currentRow++ ){
-        currentLine = (QRgb *)drawingArea->scanLine(currentRow);
+    std::vector<std::thread> threadgroup {};
+    const int linePack {drawingArea->height() / this->idealThreadCount};
+    int lineIndex {0};
+    for (int currentThread = 0; currentThread < this->idealThreadCount; currentThread++){
+        threadgroup.push_back(
+            std::thread{&GameBoard::partitionDraw, this, drawingArea, lineIndex, lineIndex + linePack}
+        );
+        lineIndex += linePack;
+    }
+    for (auto& thread : threadgroup){
+        thread.join();
+    }
+
+    this->partitionDraw(drawingArea, 0, 100);
+
+    painter->drawImage(0, 0, *drawingArea);
+    qInfo() << duration_cast<milliseconds>(system_clock::now().time_since_epoch()).count() - starttime << " milliseconds for updating the canvas.";
+}
+
+void GameBoard::partitionDraw(shared_ptr<QImage> image, size_t fromLine, size_t toLine){
+    const size_t numberOfColumns = static_cast<size_t>(image->width());
+    for (; fromLine < toLine; fromLine++){
+        QRgb *currentLine = (QRgb *)image->scanLine(fromLine);
         for (size_t currentColumn = 0; currentColumn < numberOfColumns; currentColumn++, currentLine++){
-            if (this->cells.getCell(currentColumn, currentRow) == 1){
+            if (this->cells->getCell(currentColumn, fromLine) == 1){
                 *currentLine = *this->colorLifingCell;
             } else {
                 *currentLine = *this->colorDeadCell;
             }
         }
     }
+}
 
-    painter->drawImage(0, 0, *drawingArea);
-    qInfo() << duration_cast<milliseconds>(system_clock::now().time_since_epoch()).count() - starttime << " milliseconds for updating the canvas.";
-    //debug(drawingArea);
-    //qWarning() << this->width() << "x" << this->height();
-    //qWarning() << drawingArea->width() << "x" << drawingArea->height();
+void GameBoard::init(const long width, const long height){
+    this->cells = make_unique<Cells>(width, height);
 }
 
 void GameBoard::nextGeneration(){
-    this->cells.update();
+    this->cells->update();
 }

@@ -3,9 +3,11 @@
 
 #include <QDebug>
 #include <QRandomGenerator>
+#include <QThread>
 
 #include <chrono>
 #include <mutex>
+#include <thread>
 #include <vector>
 
 using std::lock_guard;
@@ -21,21 +23,20 @@ class Cells
 public:
     Cells(const size_t, const size_t);
     void update();
-    //uint_fast8_t getCell(const size_t column, const size_t row) const { return this->population.at(column + row * this->columns); }
-    uint_fast8_t getCell(const size_t column, const size_t row) const { return this->population.at(row).at(column); }
+    uint_fast8_t getCell(const size_t column, const size_t row) const { return this->population.at(column + row * this->columns); }
 
 private:
-    void commit();
-    void initialPopulation();
+    void         commit();
+    uint_fast8_t countNeighbours(const size_t, const size_t);
+    void         initialPopulation();
+    void         partitionUpdate(size_t, size_t);
 
     const size_t rows;
     const size_t columns;
     const size_t size;
-    //vector<uint_fast8_t> population;
-    //vector<uint_fast8_t> buffer;
-
-    vector<vector<uint_fast8_t>> population;
-    vector<vector<uint_fast8_t>> buffer;
+    const unsigned int idealThreadCount;
+    vector<uint_fast8_t> population;
+    vector<uint_fast8_t> buffer;
 };
 
 #endif // CELLS_H

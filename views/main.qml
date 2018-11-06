@@ -15,6 +15,7 @@ Rectangle {
             id: gameboard
             Layout.preferredWidth: mainwrapper.width
             Layout.preferredHeight: mainwrapper.height * 0.92
+            onHeightChanged: gameboard.init(gameboard.width, gameboard.height)
         }
 
         Rectangle{
@@ -63,7 +64,7 @@ Rectangle {
     }
 
     Timer {
-        interval: 200
+        interval: 1000
         running: true
         repeat: true
         onTriggered: function(){
