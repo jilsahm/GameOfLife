@@ -27,7 +27,8 @@ public:
 
 private:
     void         commit();
-    uint_fast8_t countNeighbours(const size_t, const size_t);
+    void         partitionCommit(size_t, size_t);
+    //uint_fast8_t countNeighbours(const size_t, const size_t);
     void         initialPopulation();
     void         partitionUpdate(size_t, size_t);
 

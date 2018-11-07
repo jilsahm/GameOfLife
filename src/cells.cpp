@@ -12,37 +12,7 @@ Cells::Cells(const size_t rows, const size_t columns)
 }
 
 void Cells::update(){
-    size_t last {this->columns - 1};
     auto starttime = duration_cast<milliseconds>(system_clock::now().time_since_epoch()).count();
-
-    /*
-    for (size_t row = 0; row < this->rows; row++){
-        for (size_t column = 0; column < this->columns; column++){
-            short        neighbours {0};
-
-            int_fast64_t northwest  {static_cast<int_fast64_t>(column - 1 + (row - 1) * this->columns)};
-            int_fast64_t north      {static_cast<int_fast64_t>(column + (row - 1) * this->columns)};
-            int_fast64_t northeast  {static_cast<int_fast64_t>(column + 1 + (row - 1) * this->columns)};
-            int_fast64_t southwest  {static_cast<int_fast64_t>(column - 1 + (row + 1) * this->columns)};
-            int_fast64_t south      {static_cast<int_fast64_t>(column + (row + 1) * this->columns)};
-            int_fast64_t southeast  {static_cast<int_fast64_t>(column + 1 + (row + 1) * this->columns)};
-
-            if (column > 0 && this->population[column + row * this->columns - 1] == 1)       neighbours++;
-            if (column < last && this->population[column + row * this->columns + 1] == 1)    neighbours++;
-            if (column > 1 && northwest >= 0 && this->population[northwest] == 1)            neighbours++;
-            if (row > 0 && north >= 0 && this->population[north] == 1)                       neighbours++;
-            if (column < last && northeast >= 0 && this->population[northeast] == 1)         neighbours++;
-            if (column > 0 && southwest < this->rows && this->population[southwest] == 1)    neighbours++;
-            if (row > 0 && south < this->rows && this->population[south] == 1)               neighbours++;
-            if (column < last && southeast < this->rows && this->population[southeast] == 1) neighbours++;
-
-            if (neighbours == 3){
-                this->buffer[column + row * this->columns] = 1;
-            } else if (neighbours > 3 || neighbours < 2 ){
-                this->buffer[column + row * this->columns] = 0;
-            }
-        }
-    }*/
 
     vector<std::thread> threadgroup {};
     const size_t        rowPack {this->rows / this->idealThreadCount};
@@ -65,28 +35,39 @@ void Cells::partitionUpdate(size_t startingRow, size_t endingRow){
 
     for (; startingRow < endingRow; startingRow++){
         for (size_t column = 0; column < this->columns; column++){
-            short        neighbours {0};
+            short  neighbours  {0};
+            size_t ownPosition {column + startingRow * this->columns};
 
-            int_fast64_t northwest  {static_cast<int_fast64_t>(column - 1 + (startingRow - 1) * this->columns)};
-            int_fast64_t north      {static_cast<int_fast64_t>(column + (startingRow - 1) * this->columns)};
-            int_fast64_t northeast  {static_cast<int_fast64_t>(column + 1 + (startingRow - 1) * this->columns)};
-            int_fast64_t southwest  {static_cast<int_fast64_t>(column - 1 + (startingRow + 1) * this->columns)};
-            int_fast64_t south      {static_cast<int_fast64_t>(column + (startingRow + 1) * this->columns)};
-            int_fast64_t southeast  {static_cast<int_fast64_t>(column + 1 + (startingRow + 1) * this->columns)};
+            size_t northwest (ownPosition - 1 - this->columns);
+            size_t north     (ownPosition - this->columns);
+            size_t northeast (ownPosition + 1 - this->columns);
+            size_t southwest (ownPosition - 1 + this->columns);
+            size_t south     (ownPosition + this->columns);
+            size_t southeast (ownPosition + 1 + this->columns);
 
-            if (column > 0 && this->population[column + startingRow * this->columns - 1] == 1)       neighbours++;
-            if (column < last && this->population[column + startingRow * this->columns + 1] == 1)    neighbours++;
-            if (column > 1 && northwest >= 0 && this->population[northwest] == 1)            neighbours++;
-            if (startingRow > 0 && north >= 0 && this->population[north] == 1)                       neighbours++;
-            if (column < last && northeast >= 0 && this->population[northeast] == 1)         neighbours++;
-            if (column > 0 && southwest < this->rows && this->population[southwest] == 1)    neighbours++;
-            if (startingRow > 0 && south < this->rows && this->population[south] == 1)               neighbours++;
+            //Northwest
+            if (column > 1 && startingRow > 0 && this->population[northwest] == 1) neighbours++;
+            //North
+            if (startingRow > 0 && this->population[north] == 1) neighbours++;
+            //Northeast
+            if (column < last && startingRow > 0 && this->population[northeast] == 1) neighbours++;
+
+            //West
+            if (column > 0 && this->population[ownPosition - 1] == 1) neighbours++;
+            //East
+            if (column < last && this->population[ownPosition + 1] == 1) neighbours++;
+
+            //Southwest
+            if (column > 0 && southwest < this->rows && this->population[southwest] == 1) neighbours++;
+            //South
+            if (startingRow > 0 && south < this->rows && this->population[south] == 1) neighbours++;
+            //Southeast
             if (column < last && southeast < this->rows && this->population[southeast] == 1) neighbours++;
 
             if (neighbours == 3){
-                this->buffer[column + startingRow * this->columns] = 1;
+                this->buffer[ownPosition] = 1;
             } else if (neighbours > 3 || neighbours < 2 ){
-                this->buffer[column + startingRow * this->columns] = 0;
+                this->buffer[ownPosition] = 0;
             }
         }
     }
@@ -94,10 +75,26 @@ void Cells::partitionUpdate(size_t startingRow, size_t endingRow){
 
 void Cells::commit(){
     auto starttime = duration_cast<milliseconds>(system_clock::now().time_since_epoch()).count();
-    for (size_t i = 0; i < this->size; i++){
-        this->population[i] = this->buffer[i];
+
+    vector<std::thread> threadgroup  {};
+    const size_t        cellPack     {this->size / this->idealThreadCount};
+    size_t              startingCell {0};
+
+    for (unsigned int currentThread = 0; currentThread < this->idealThreadCount; currentThread++){
+        threadgroup.push_back(std::thread {&Cells::partitionCommit, this, startingCell, startingCell + cellPack });
+        startingCell += cellPack;
     }
+    for (auto &thread : threadgroup){
+        thread.join();
+    }
+
     qInfo() << duration_cast<milliseconds>(system_clock::now().time_since_epoch()).count() - starttime << " milliseconds for commiting changes.";
+}
+
+void Cells::partitionCommit(size_t start, size_t end){
+    for (; start < end; start++){
+        this->population[start] = this->buffer[start];
+    }
 }
 
 void Cells::initialPopulation(){
