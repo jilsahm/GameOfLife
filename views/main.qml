@@ -5,6 +5,7 @@ import game 1.0
 
 Rectangle {
     id: mainwrapper
+    color: "#000"
     visible: true
 
     ColumnLayout{
@@ -15,6 +16,8 @@ Rectangle {
             id: gameboard
             Layout.preferredWidth: mainwrapper.width
             Layout.preferredHeight: mainwrapper.height * 0.92
+            Layout.fillHeight: true
+            Layout.margins: 0
             onHeightChanged: gameboard.init(gameboard.width, gameboard.height)
         }
 
@@ -22,6 +25,8 @@ Rectangle {
             color: "#000"
             Layout.preferredWidth: mainwrapper.width
             Layout.preferredHeight: mainwrapper.height * 0.08
+            Layout.fillHeight: true
+            Layout.margins: 0
 
             IconButton{
                 symbol: "\uf2f9"
@@ -64,7 +69,7 @@ Rectangle {
     }
 
     Timer {
-        interval: 2000
+        interval: 200
         running: true
         repeat: true
         onTriggered: function(){

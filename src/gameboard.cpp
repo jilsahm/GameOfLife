@@ -29,23 +29,7 @@ void GameBoard::debug(shared_ptr<QImage> image){
 
 void GameBoard::paint(QPainter * painter){
     static auto drawingArea     = make_shared<QImage>(this->width(), this->height(), QImage::Format_ARGB32);
-    size_t      numberOfRows    {static_cast<size_t>(drawingArea->height())};
-    size_t      numberOfColumns {static_cast<size_t>(drawingArea->width())};
-    QRgb       *currentLine     {nullptr};
     auto starttime = duration_cast<milliseconds>(system_clock::now().time_since_epoch()).count();
-    /*
-    if (this->cells != nullptr){
-        for (size_t currentRow = 0; currentRow < numberOfRows; currentRow++ ){
-            currentLine = (QRgb *)drawingArea->scanLine(currentRow);
-            for (size_t currentColumn = 0; currentColumn < numberOfColumns; currentColumn++, currentLine++){
-                if (this->cells->getCell(currentColumn, currentRow) == 1){
-                    *currentLine = *this->colorLifingCell;
-                } else {
-                    *currentLine = *this->colorDeadCell;
-                }
-            }
-        }
-    }*/
 
     std::vector<std::thread> threadgroup {};
     const int linePack {drawingArea->height() / this->idealThreadCount};
@@ -68,7 +52,7 @@ void GameBoard::paint(QPainter * painter){
 
 void GameBoard::partitionDraw(shared_ptr<QImage> image, size_t fromLine, size_t toLine){
     const size_t numberOfColumns = static_cast<size_t>(image->width());
-    for (; fromLine < toLine; fromLine++){
+    for (; fromLine <= toLine; fromLine++){
         QRgb *currentLine = (QRgb *)image->scanLine(fromLine);
         for (size_t currentColumn = 0; currentColumn < numberOfColumns; currentColumn++, currentLine++){
             if (this->cells->getCell(currentColumn, fromLine) == 1){

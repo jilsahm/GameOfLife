@@ -31,7 +31,8 @@ void Cells::update(){
 }
 
 void Cells::partitionUpdate(size_t startingRow, size_t endingRow){
-    size_t last {this->columns - 1};
+    size_t lastColumn {this->columns - 1};
+    size_t lastRow {this->rows - 1};
 
     for (; startingRow < endingRow; startingRow++){
         for (size_t column = 0; column < this->columns; column++){
@@ -50,19 +51,19 @@ void Cells::partitionUpdate(size_t startingRow, size_t endingRow){
             //North
             if (startingRow > 0 && this->population[north] == 1) neighbours++;
             //Northeast
-            if (column < last && startingRow > 0 && this->population[northeast] == 1) neighbours++;
+            if (column < lastColumn && startingRow > 0 && this->population[northeast] == 1) neighbours++;
 
             //West
             if (column > 0 && this->population[ownPosition - 1] == 1) neighbours++;
             //East
-            if (column < last && this->population[ownPosition + 1] == 1) neighbours++;
+            if (column < lastColumn && this->population[ownPosition + 1] == 1) neighbours++;
 
             //Southwest
-            if (column > 0 && southwest < this->rows && this->population[southwest] == 1) neighbours++;
+            if (column > 0 && startingRow < lastRow && this->population[southwest] == 1) neighbours++;
             //South
-            if (startingRow > 0 && south < this->rows && this->population[south] == 1) neighbours++;
+            if (startingRow > 0 && startingRow < lastRow && this->population[south] == 1) neighbours++;
             //Southeast
-            if (column < last && southeast < this->rows && this->population[southeast] == 1) neighbours++;
+            if (column < lastColumn && startingRow < lastRow && this->population[southeast] == 1) neighbours++;
 
             if (neighbours == 3){
                 this->buffer[ownPosition] = 1;
