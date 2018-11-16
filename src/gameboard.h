@@ -27,7 +27,7 @@ public:
     void paint(QPainter *) override;
     void debug(shared_ptr<QImage>);
     Q_INVOKABLE void init(const long, const long);
-    Q_INVOKABLE void nextGeneration();    
+    Q_INVOKABLE void nextGeneration();
 
 private:
     void partitionDraw(shared_ptr<QImage>, size_t, size_t);
@@ -36,6 +36,7 @@ private:
     unique_ptr<QRgb>  colorLifingCell;
     unique_ptr<QRgb>  colorDeadCell;
     unique_ptr<Cells> cells;
+    std::mutex        mutex;
 };
 
 #endif // GAMEBOARD_H

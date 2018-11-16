@@ -33,7 +33,8 @@ Rectangle {
                 anchors.left: parent.left
                 anchors.verticalCenter: parent.verticalCenter
                 callback: function(){
-                    console.log("Restart")
+                    //console.log("Restart")
+                    gameboard.init(gameboard.width, gameboard.height);
                 }
             }
 
@@ -42,12 +43,18 @@ Rectangle {
                 symbol: "\uf04a"
                 anchors.right: btnStop.left
                 anchors.verticalCenter: parent.verticalCenter
+                callback: function(){
+                    // Decrease speed
+                }
             }
 
             IconButton{
                 id: btnStop
                 symbol: "\uf04c"
                 anchors.centerIn: parent
+                callback: function(){
+                    // Pause
+                }
             }
 
             IconButton{
@@ -55,6 +62,9 @@ Rectangle {
                 symbol: "\uf04e"
                 anchors.left: btnStop.right
                 anchors.verticalCenter: parent.verticalCenter
+                callback: function(){
+                    // Increase speed
+                }
             }
 
             IconButton{

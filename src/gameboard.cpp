@@ -3,7 +3,8 @@
 GameBoard::GameBoard(QQuickItem * parent)
     : QQuickPaintedItem(parent),
       idealThreadCount{QThread::idealThreadCount()},
-      cells{nullptr}
+      cells{nullptr},
+      mutex{}
 {
     this->colorLifingCell = make_unique<QRgb>(qRgb(100, 255, 100));
     this->colorDeadCell   = make_unique<QRgb>(qRgb(32, 32, 32));
@@ -65,9 +66,11 @@ void GameBoard::partitionDraw(shared_ptr<QImage> image, size_t fromLine, size_t 
 }
 
 void GameBoard::init(const long width, const long height){
+    std::lock_guard<std::mutex> lockguard{this->mutex};
     this->cells = make_unique<Cells>(width, height);
 }
 
 void GameBoard::nextGeneration(){
+    std::lock_guard<std::mutex> lockguard{this->mutex};
     this->cells->update();
 }
