@@ -28,6 +28,7 @@ public:
     void debug(shared_ptr<QImage>);
     Q_INVOKABLE void init(const long, const long);
     Q_INVOKABLE void nextGeneration();
+    Q_INVOKABLE void spawnCell(const long, const long);
 
 private:
     void partitionDraw(shared_ptr<QImage>, size_t, size_t);

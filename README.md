@@ -2,6 +2,11 @@
 
 <img src="/docs/MainFrame.png">
 
-## ToDos
+## Features
 * Reset button
 * Speed and pause buttons
+* Spawning cells on click
+
+##ToDos
+* Visualisation on speedchange
+* Better spawning of cells on click

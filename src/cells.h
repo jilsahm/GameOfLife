@@ -24,6 +24,7 @@ public:
     Cells(const size_t, const size_t);
     void update();
     uint_fast8_t getCell(const size_t column, const size_t row) const { return this->population.at(column + row * this->columns); }
+    void spawnCell(const size_t column, const size_t row) { this->population.at(column + row * this->columns) = 1; }
 
 private:
     void         commit();

@@ -19,6 +19,14 @@ Rectangle {
             Layout.fillHeight: true
             Layout.margins: 0
             onHeightChanged: gameboard.init(gameboard.width, gameboard.height)
+            MouseArea{
+                width: parent.width
+                height: parent.height
+                onClicked: function(){
+                    //console.log(mouseX, mouseY);
+                    gameboard.spawnCell(mouseX, mouseY);
+                }
+            }
         }
 
         Rectangle{
@@ -45,6 +53,10 @@ Rectangle {
                 anchors.verticalCenter: parent.verticalCenter
                 callback: function(){
                     // Decrease speed
+                    if (!timer.running){
+                        timer.start();
+                    }
+                    timer.interval = 1000;
                 }
             }
 
@@ -54,6 +66,7 @@ Rectangle {
                 anchors.centerIn: parent
                 callback: function(){
                     // Pause
+                    timer.stop();
                 }
             }
 
@@ -64,6 +77,10 @@ Rectangle {
                 anchors.verticalCenter: parent.verticalCenter
                 callback: function(){
                     // Increase speed
+                    if (!timer.running){
+                        timer.start();
+                    }
+                    timer.interval = 200;
                 }
             }
 
@@ -79,6 +96,7 @@ Rectangle {
     }
 
     Timer {
+        id: timer
         interval: 200
         running: true
         repeat: true

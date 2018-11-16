@@ -74,3 +74,8 @@ void GameBoard::nextGeneration(){
     std::lock_guard<std::mutex> lockguard{this->mutex};
     this->cells->update();
 }
+
+void GameBoard::spawnCell(const long x, const long y){
+    std::lock_guard<std::mutex> lockguard{this->mutex};
+    this->cells->spawnCell(x, y);
+}
